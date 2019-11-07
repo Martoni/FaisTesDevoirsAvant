@@ -1,0 +1,161 @@
+#include<time.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+
+#define ZERO 48
+#define NOM_BASE "verbe.tux"
+#define NBR_VRB 16
+
+
+struct verbe_ir{
+	char francais[20];
+	char base_verbal[20];
+	char preterite[20];
+	char participep[20];
+};
+
+int TUX_puissance(int nbre, int indice) /* comme son nom l'indique !!!!!*/
+{
+	if(indice == 0){ return(1);
+	}else{
+	return(nbre*TUX_puissance(nbre,indice-1));
+	};
+}
+
+int TUX_stringtoint(char *chaine) /* fction qui convertie une chaine de caractère en int)*/
+{
+	int indice;
+	int entier=0;
+	for(indice = strlen(chaine);indice;indice--)
+	{
+		entier = entier + TUX_puissance(10,indice-1)*( chaine[strlen(chaine)-indice] - ZERO);
+	}
+	return(entier);
+
+}
+
+char *TUX_inttostring(int nbre,int taille) /* fction qui convertie un int en chaine de caractères*/
+{
+	char *pointeur;
+	int indice;
+	if( (pointeur = (char *)malloc(taille+1)) == NULL){printf("TUX_ibttostring : erreur d'allocation de memoire\n");return(NULL);}
+
+	for(indice = 0 ; indice < taille ; indice++)
+	{
+		*(pointeur+indice) = nbre/TUX_puissance(10,taille-indice-1) + ZERO;
+		nbre = nbre % TUX_puissance(10,taille-indice-1);
+	}
+	*(pointeur+indice) = '\0';
+	return(pointeur);
+
+
+}
+
+
+
+
+struct verbe_ir lit_verbes(FILE *base,int champ){
+	struct verbe_ir retourner;
+	int nbrechamp;
+	char *lu;
+	int indice;
+
+	retourner.francais[0]='o';
+	retourner.base_verbal[0]='o';
+	retourner.preterite[0]='o';
+	retourner.participep[0]='o';
+
+	if((lu = (char *)malloc(100*sizeof(char)))==NULL){printf("erreur malloc\n");return(retourner);}
+
+	if(fseek(base,0L,SEEK_SET)){printf("verbe_ir : erreur de fseek\n");return(retourner);}
+	fscanf(base,"%s",lu);
+	nbrechamp = TUX_stringtoint(lu);
+	printf("il y a %d verbe dans 'verbe.tux'\n",nbrechamp);
+	if(!champ||(champ>nbrechamp)){
+	printf("il n'y a que %d verbe !! donc pas de nø%d\n",nbrechamp,champ);
+	return(retourner);}
+
+	for(indice=1;indice<=champ;indice++){
+	/*      printf("%d\n",indice);*/
+		fscanf(base,"%s %s %s %s",
+		&retourner.francais,
+		&retourner.base_verbal,
+		&retourner.preterite,
+		&retourner.participep);
+	}
+
+
+
+
+
+
+
+/*
+	//printf("%s\n",retourner.francais);
+	//printf("chaine lu : %s\n",lu);
+*/
+
+
+	return(retourner);
+}
+
+int egal(struct verbe_ir verbe1,struct verbe_ir verbe2)
+{
+	if(!strcmp(verbe1.base_verbal,verbe2.base_verbal))
+		if(!strcmp(verbe1.preterite,verbe2.preterite))
+			if(!strcmp(verbe1.participep,verbe2.participep))
+				return(1);
+
+	return(0);
+}
+
+
+
+int main()
+{
+	FILE *base;
+	int nbreverbe;
+	struct verbe_ir verbelu,verberecite;
+	int indice;
+	long temps;
+
+	printf("\n\n\n\n\n");
+	if( (base=fopen(NOM_BASE,"r"))==NULL){
+		printf("j'arrive pas … ouvrir la base \n");
+		return(-1);
+	}
+	fscanf(base,"%u",&nbreverbe);
+
+	printf("un peu de verbes irr‚guliers !\n");
+
+	for(indice=1;indice<=5;indice++){
+		time(&temps);
+
+		verbelu = lit_verbes(base,(int)(temps%nbreverbe+1));
+		printf("\n\n\n\n\n");
+		printf("il te reste %d verbe(s) a reciter\n",6-indice);
+
+		do{
+			printf("Que donne '%s' en anglais :\n\nbase verbale : ",verbelu.francais);scanf("%s",&verberecite.base_verbal);
+			printf("preterit  : ");scanf("%s",&verberecite.preterite);
+			printf("participe pass‚ : ");scanf("%s",&verberecite.participep);
+
+			printf("\n\n\n\n\n");
+			if(!egal(verbelu,verberecite)){indice=0;printf("NAN !!!!!!!!!!!!!!\nRECOMMENCE gros naze\n");}
+
+		}
+		while(!egal(verbelu,verberecite));
+
+
+
+
+	}
+
+	/*printf("il y a %d verbes\n",nbreverbe);*/
+
+
+	fclose(base);
+	printf("BRRRAAAAAAAAAAAAAVVVVVVVVVVVVVOOOOOOOOOOOOO !!!!!!!!!!!! :-)\n");
+}
+
