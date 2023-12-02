@@ -98,8 +98,10 @@ if __name__ == "__main__":
                         textvalue = json.loads(res).get("text", None)
                         if textvalue is not None:
                             response = my_text_2_num(textvalue)
-                            if textvalue.strip() == "" or response < 0:
+                            if textvalue.strip() == "":
                                 print("alors ?")
+                            elif response < 0:
+                                print(f"J'ai pas compris ({textvalue})")
                             else:
                                 print(f"(Ta réponse «{textvalue}» -> {response})")
                                 if response == a * b:
